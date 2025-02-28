@@ -3,146 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>테스트 구글드라이브 PDF</title>
-    <meta property="og:title" content="테스트 구글드라이브 PDF">
+    <title>Centara Grand Hotel Osaka 2025년 5,6월 요금표</title>
+    <meta property="og:title" content="Centara Grand Hotel Osaka 2025년 5,6월 요금표">
     <meta property="og:type" content="article">
     <meta property="og:image" content="https://drive.google.com/thumbnail?id=11GX2RXyotcHgOO6RVZbZYU3F-hIpmTzL">
-    <meta property="og:description" content="테스트 구글드라이브 PDF">
+    <meta property="og:description" content="PDF 문서: Centara Grand Hotel Osaka 2025년 5,6월 요금표">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #ffffff;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            overflow-y: auto; /* 페이지 스크롤 허용 */
-        }
-
-        #outer-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            background: #ffffff;
-        }
-
-        #pdf-container {
-            width: 100%;
-            max-width: 850px;
-            background: #ffffff;
-            overflow-y: auto; /* PDF 컨테이너 스크롤 허용 */
-            height: 100vh; /* 뷰포트 높이에 맞춤 */
-        }
-
-        .pdf-page {
-            width: 100%;
-            display: block;
-            margin: 0;
-            position: relative;
-            background: #ffffff;
-            line-height: 0;
-        }
-
-        canvas {
-            width: 100% !important;
-            height: auto !important;
-            display: block;
-        }
-
-        ::-webkit-scrollbar {
-            width: 0; /* Webkit 브라우저 스크롤바 숨김 */
-        }
-
-        * {
-            scrollbar-width: none; /* Firefox 스크롤바 숨김 */
-            -ms-overflow-style: none; /* IE/Edge 스크롤바 숨김 */
-        }
-
-        @media (max-width: 880px) {
-            #pdf-container {
-                max-width: 95%;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #ffffff; margin: 0; padding: 0; min-height: 100vh; overflow-y: auto; }
+        #outer-container { width: 100%; display: flex; justify-content: center; background: #ffffff; }
+        #pdf-container { width: 100%; max-width: 850px; background: #ffffff; overflow-y: auto; height: 100vh; }
+        .pdf-page { width: 100%; display: block; margin: 0; position: relative; background: #ffffff; line-height: 0; }
+        canvas { width: 100% !important; height: auto !important; display: block; }
+        #loading { text-align: center; padding: 20px; font-family: Arial, sans-serif; }
+        ::-webkit-scrollbar { width: 0; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        @media (max-width: 880px) { #pdf-container { max-width: 95%; } }
     </style>
 </head>
 <body>
     <div id="outer-container">
-        <div id="pdf-container"></div>
+        <div id="pdf-container">
+            <div id="loading">PDF를 로드하는 중입니다...</div>
+        </div>
     </div>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         const pdfContainer = document.getElementById('pdf-container');
+        const loadingElement = document.getElementById('loading');
         let currentScale = 1.5;
 
         async function renderPage(pdfDoc, pageNum) {
             const page = await pdfDoc.getPage(pageNum);
             const viewport = page.getViewport({ scale: currentScale });
-            
             const pageDiv = document.createElement('div');
             pageDiv.className = 'pdf-page';
-            
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
-
             const outputScale = window.devicePixelRatio || 1;
             canvas.width = Math.floor(viewport.width * outputScale);
             canvas.height = Math.floor(viewport.height * outputScale);
             canvas.style.width = `${viewport.width}px`;
             canvas.style.height = `${viewport.height}px`;
-
             pageDiv.appendChild(canvas);
             pdfContainer.appendChild(pageDiv);
-
-            const transform = outputScale !== 1 
-                ? [outputScale, 0, 0, outputScale, 0, 0] 
-                : null;
-
-            await page.render({
-                canvasContext: context,
-                transform: transform,
-                viewport: viewport
-            }).promise;
+            const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+            await page.render({ canvasContext: context, transform: transform, viewport: viewport }).promise;
         }
 
-        async function loadPDF() {
-            const fileId = '11GX2RXyotcHgOO6RVZbZYU3F-hIpmTzL';
-            const apiKey = 'AIzaSyBghbCPF8ROYTJquZnEy01_sCl2AFmplM0'; // Google Drive API 키 입력
-            const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
-
+        async function loadPDFFromGAS(fileId) {
             try {
-                const response = await fetch(url);
-                const pdfBlob = await response.blob();
-                const pdfUrl = URL.createObjectURL(pdfBlob);
-
-                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                // 여기에 실제 배포된 Apps Script 웹 앱 URL을 입력하세요
+                const scriptId = 'AKfycbwIplZGTTav4CmHeMCkygBm-D7DD2R15vJE9QCOiTrvTNRWtdItv6GOZ_Pc9XdPkYhR'; // 이 부분을 실제 배포 ID로 교체하세요
+                const pdfUrl = `https://script.google.com/macros/s/${scriptId}/exec?fileId=${fileId}`;
+                
+                console.log('PDF URL 요청:', pdfUrl);
+                loadingElement.textContent = "PDF 데이터 요청 중...";
+                
+                // 첫 번째 요청으로 스크립트 실행 권한 활성화
+                const response = await fetch(pdfUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP 오류: ${response.status}`);
+                }
+                
+                loadingElement.textContent = "PDF 데이터 수신 중...";
+                
+                // Base64 데이터 받기
+                const base64Text = await response.text();
+                console.log('Base64 데이터 길이:', base64Text.length);
+                
+                if (!base64Text || base64Text.startsWith('오류 발생:')) {
+                    throw new Error(base64Text || 'PDF 데이터를 받지 못했습니다');
+                }
+                
+                loadingElement.textContent = "PDF 디코딩 중...";
+                
+                // Base64 디코딩 및 Uint8Array 생성
+                const binaryString = atob(base64Text);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                // PDF Blob 생성 및 URL 객체 생성
+                const pdfBlob = new Blob([bytes], { type: 'application/pdf' });
+                const blobUrl = URL.createObjectURL(pdfBlob);
+                
+                loadingElement.textContent = "PDF 렌더링 중...";
+                
+                // PDF.js로 문서 로드
+                const loadingTask = pdfjsLib.getDocument(blobUrl);
                 const pdfDoc = await loadingTask.promise;
                 
+                // 로딩 메시지 제거
+                loadingElement.remove();
+                
+                // 모든 페이지 렌더링
                 for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
                     await renderPage(pdfDoc, pageNum);
                 }
+                
+                console.log('PDF 렌더링 완료');
             } catch (error) {
-                console.error('PDF 로딩 에러:', error);
-                document.body.innerHTML = '<p>문서를 불러올 수 없습니다.</p>';
+                console.error('PDF 로딩 오류:', error);
+                loadingElement.textContent = '문서를 불러올 수 없습니다: ' + error.message;
             }
         }
 
-        loadPDF();
+        // 파일 ID로 PDF 로드
+        const fileId = '11GX2RXyotcHgOO6RVZbZYU3F-hIpmTzL';
+        console.log('PDF 로드 시작, 파일 ID:', fileId);
+        loadPDFFromGAS(fileId);
 
-        // 페이지 전체에서 스크롤 이벤트 캡처
+        // 스크롤 이벤트 처리
         document.addEventListener('wheel', (e) => {
-            e.preventDefault(); // 기본 스크롤 동작 방지
-            const scrollAmount = e.deltaY; // 스크롤 방향과 양
-            pdfContainer.scrollTop += scrollAmount; // PDF 컨테이너 스크롤 조정
+            e.preventDefault();
+            const scrollAmount = e.deltaY;
+            pdfContainer.scrollTop += scrollAmount;
         }, { passive: false });
 
-        // 모바일 터치 스크롤 지원
         let touchStartY = 0;
         document.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
