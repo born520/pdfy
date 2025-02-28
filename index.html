@@ -74,17 +74,17 @@
                     throw new Error(`HTTP 오류: ${response.status}`);
                 }
                 
-                loadingElement.textContent = "PDF 데이터 수신 중...";
+                loadingElement.textContent = "데이터 수신 중...";
                 
                 // Base64 데이터 받기
                 const base64Text = await response.text();
                 console.log('Base64 데이터 길이:', base64Text.length);
                 
                 if (!base64Text || base64Text.startsWith('오류 발생:')) {
-                    throw new Error(base64Text || 'PDF 데이터를 받지 못했습니다');
+                    throw new Error(base64Text || '데이터를 받지 못했습니다');
                 }
                 
-                loadingElement.textContent = "PDF 디코딩 중...";
+                loadingElement.textContent = "디코딩 중...";
                 
                 // Base64 디코딩 및 Uint8Array 생성
                 const binaryString = atob(base64Text);
