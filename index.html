@@ -25,7 +25,7 @@
 <body>
     <div id="outer-container">
         <div id="pdf-container">
-            <div id="loading">PDF를 로드하는 중입니다...</div>
+            <div id="loading">로드중</div>
         </div>
     </div>
 
@@ -61,7 +61,7 @@
                 const pdfUrl = `https://script.google.com/macros/s/${scriptId}/exec?fileId=${fileId}`;
                 
                 console.log('PDF URL 요청:', pdfUrl);
-                loadingElement.textContent = "PDF 데이터 요청 중...";
+                loadingElement.textContent = "요청 중...";
                 
                 // 첫 번째 요청으로 스크립트 실행 권한 활성화
                 const response = await fetch(pdfUrl, {
