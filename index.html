@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 구글드라이브 PDF</title>
+    <meta property="og:title" content="테스트 구글드라이브 PDF">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://drive.google.com/thumbnail?id=11GX2RXyotcHgOO6RVZbZYU3F-hIpmTzL">
+    <meta property="og:description" content="테스트 구글드라이브 PDF">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-y: auto; /* 페이지 스크롤 허용 */
+        }
+
+        #outer-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        #pdf-container {
+            width: 100%;
+            max-width: 850px;
+            background: #ffffff;
+            overflow-y: auto; /* PDF 컨테이너 스크롤 허용 */
+            height: 100vh; /* 뷰포트 높이에 맞춤 */
+        }
+
+        .pdf-page {
+            width: 100%;
+            display: block;
+            margin: 0;
+            position: relative;
+            background: #ffffff;
+            line-height: 0;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            display: block;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0; /* Webkit 브라우저 스크롤바 숨김 */
+        }
+
+        * {
+            scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+            -ms-overflow-style: none; /* IE/Edge 스크롤바 숨김 */
+        }
+
+        @media (max-width: 880px) {
+            #pdf-container {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="outer-container">
+        <div id="pdf-container"></div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const pdfContainer = document.getElementById('pdf-container');
+        let currentScale = 1.5;
+
+        async function renderPage(pdfDoc, pageNum) {
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: currentScale });
+            
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'pdf-page';
+            
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            const outputScale = window.devicePixelRatio || 1;
+            canvas.width = Math.floor(viewport.width * outputScale);
+            canvas.height = Math.floor(viewport.height * outputScale);
+            canvas.style.width = `${viewport.width}px`;
+            canvas.style.height = `${viewport.height}px`;
+
+            pageDiv.appendChild(canvas);
+            pdfContainer.appendChild(pageDiv);
+
+            const transform = outputScale !== 1 
+                ? [outputScale, 0, 0, outputScale, 0, 0] 
+                : null;
+
+            await page.render({
+                canvasContext: context,
+                transform: transform,
+                viewport: viewport
+            }).promise;
+        }
+
+        async function loadPDF() {
+            const fileId = '11GX2RXyotcHgOO6RVZbZYU3F-hIpmTzL';
+            const apiKey = 'AIzaSyBghbCPF8ROYTJquZnEy01_sCl2AFmplM0'; // Google Drive API 키 입력
+            const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
+
+            try {
+                const response = await fetch(url);
+                const pdfBlob = await response.blob();
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+
+                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                const pdfDoc = await loadingTask.promise;
+                
+                for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                    await renderPage(pdfDoc, pageNum);
+                }
+            } catch (error) {
+                console.error('PDF 로딩 에러:', error);
+                document.body.innerHTML = '<p>문서를 불러올 수 없습니다.</p>';
+            }
+        }
+
+        loadPDF();
+
+        // 페이지 전체에서 스크롤 이벤트 캡처
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault(); // 기본 스크롤 동작 방지
+            const scrollAmount = e.deltaY; // 스크롤 방향과 양
+            pdfContainer.scrollTop += scrollAmount; // PDF 컨테이너 스크롤 조정
+        }, { passive: false });
+
+        // 모바일 터치 스크롤 지원
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const deltaY = touchStartY - touchY;
+            pdfContainer.scrollTop += deltaY;
+            touchStartY = touchY;
+        }, { passive: true });
+    </script>
+</body>
+</html>
